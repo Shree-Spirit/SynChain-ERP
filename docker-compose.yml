@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: synchain-erp-db
+    environment:
+      POSTGRES_USER: synchain
+      POSTGRES_PASSWORD: synchain
+      POSTGRES_DB: synchain_erp
+    ports:
+      - "5432:5432"
+    volumes:
+      - synchain_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U synchain -d synchain_erp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: synchain-erp-api
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: SynChain-ERP
+      DATABASE_URL: postgresql://synchain:synchain@db:5432/synchain_erp
+      SECRET_KEY: change-me-to-a-long-random-string
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "480"
+      API_KEY: synchain-erp-dev-api-key
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             python -m app.db.seed &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  synchain_pgdata:
