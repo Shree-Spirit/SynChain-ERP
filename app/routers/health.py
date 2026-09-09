@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import get_settings
 from app.db.session import engine
