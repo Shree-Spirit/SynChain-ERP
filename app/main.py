@@ -57,6 +57,7 @@ def create_app() -> FastAPI:
 
     prefix = settings.API_V1_PREFIX
     application.include_router(health.router, prefix=prefix)
+    application.include_router(health.router)
     application.include_router(auth.router, prefix=prefix)
     application.include_router(suppliers.router, prefix=prefix)
     application.include_router(warehouses.router, prefix=prefix)
